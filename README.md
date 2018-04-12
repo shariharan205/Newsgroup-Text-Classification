@@ -14,7 +14,8 @@ TextClassification.py file essentially contains all the data preprocessing, feat
 run.py gets the control from the user and passes it on to the TextClassification class. 
 
 To run the project:
-	python run.py 
+
+python run.py 
 	
-	After completing each sub task, the execution pauses and asks for the user to continue or not. Press y to continue. 
+After completing each sub task, the execution pauses and asks for the user to continue or not. Press y to continue. 
 
