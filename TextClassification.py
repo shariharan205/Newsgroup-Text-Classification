@@ -157,3 +157,37 @@ class TextClassifier(object):
         print "Dimension of TF-IDF features for testing dataset with min_df = ", df, " : ", self.tfidf_test.shape
 
 
+    def get_tficf(self, significant_terms_reqd, target_classes):
+        """
+        Here, the same process as TF-IDF is done, but we keep summing each row of a tficf matrix
+        with the count frequency of corresponding index.  We use feature_names() to map the row number
+        to the word name
+        """
+
+        all_category_data = self.get_data()
+        all_categories = all_category_data.target_names
+        n_classes = len(all_categories)
+
+        for i in range(len(all_category_data.data)):
+            all_category_data.data[i] = self.preprocess(all_category_data.data[i])
+
+        count_vec = CountVectorizer(min_df=5)
+        count_frequency = count_vec.fit_transform(all_category_data.data)
+        docs_len, terms_len = count_frequency.shape
+
+        tficf = np.zeros(shape=(n_classes, terms_len))
+
+        for i in range(docs_len):
+            category_index = all_category_data.target[i]
+            tficf[category_index,] = tficf[category_index,] + count_frequency[i,]
+
+        tficf = TfidfTransformer(use_idf=True).fit(count_frequency).transform(tficf)
+
+        features = count_vec.get_feature_names()
+
+        print "\nClass    -       Top 10 significant terms for the class"
+        for class_name in target_classes:
+            print class_name, "-" , self.get_significant_terms(tficf[all_categories.index(class_name)].toarray(),
+                                                               features, significant_terms_reqd)
+
+
