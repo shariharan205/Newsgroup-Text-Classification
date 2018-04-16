@@ -1,9 +1,12 @@
+import numpy as np
 import matplotlib.pyplot as plt
 from nltk.stem.porter import *
+from collections import Counter
 from nltk.stem.snowball import SnowballStemmer
 from sklearn.metrics import roc_curve, auc
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction import text
+from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 
 def breakpoint():
     """
@@ -98,3 +101,59 @@ class TextClassifier(object):
         stop_words = self.get_stop_words()
         words = [self.get_stemmer().stem(word.lower()) for word in words if word not in stop_words and len(word) > 2]
         return ' '.join(words)
+
+
+    def get_histogram(self, categories, plot = True):
+        """
+        Given the list of categories, retrieve the newsgroup data and plot the histogram.
+        We use a Counter to get the words and corresponding frequency counts
+        """
+
+        self.train = self.get_data(categories, subset_var= 'train')
+        self.test = self.get_data(categories, subset_var='test')
+        counts = Counter(self.train.target)
+        frequencies = [counts[i] for i in counts]
+
+        if plot:
+            plt.bar(self.train.target_names, frequencies, 0.5, color='b')
+            plt.title("#Training docs per class histogram")
+            plt.xlabel("Class")
+            plt.ylabel("Number of training documents")
+            plt.xticks(fontsize = 8, rotation=20)
+            plt.savefig('histogram.png', format='png')
+            plt.show()
+
+        print "Total number of Computer Technology training documents = " , sum(frequencies[:4])
+        print "Total number of Recreational Activity training documents = ", sum(frequencies[4:])
+        print "Mean of training documents size in these 8 categories = ", np.mean(frequencies)
+        print "Standard deviation = ", np.std(frequencies)
+
+
+
+
+    def get_tfidf(self, df = 2):
+        """
+        Training and testing data are preprocessed.
+        Countvectorizer and TfidfTransformer are used to extract TF-IDF features.
+        """
+
+        for i in range(len(self.train.data)):
+            self.train.data[i] = self.preprocess(self.train.data[i])
+
+
+        for i in range(len(self.test.data)):
+            self.test.data[i] = self.preprocess(self.test.data[i])
+
+        cv = CountVectorizer(min_df=df)
+        tf = TfidfTransformer()
+
+        train_counts = cv.fit_transform(self.train.data)
+        self.tfidf_train = tf.fit_transform(train_counts)
+
+        test_counts = cv.transform(self.test.data)
+        self.tfidf_test = tf.transform(test_counts)
+
+        print "Dimension of TF-IDF features for training dataset with min_df = ", df, " : ", self.tfidf_train.shape
+        print "Dimension of TF-IDF features for testing dataset with min_df = ", df, " : ", self.tfidf_test.shape
+
+
