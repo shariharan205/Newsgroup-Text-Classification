@@ -1,11 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from nltk.stem.porter import *
+from nltk.corpus import stopwords
 from collections import Counter
 from nltk.stem.snowball import SnowballStemmer
+from sklearn import metrics, cross_validation
+from sklearn.svm import SVC
 from sklearn.metrics import roc_curve, auc
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction import text
+from sklearn.decomposition import TruncatedSVD, NMF
 from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 
 def breakpoint():
@@ -189,5 +193,31 @@ class TextClassifier(object):
         for class_name in target_classes:
             print class_name, "-" , self.get_significant_terms(tficf[all_categories.index(class_name)].toarray(),
                                                                features, significant_terms_reqd)
+
+
+
+
+    def feature_selection(self, technique = "lsi"):
+        """
+        Performs dimension reduction to 50 components on lsi and nmf based on the input argument.
+        """
+
+        if technique == "lsi":
+
+            print '\nThe dimensions before performing LSI are ' , self.tfidf_train.shape
+            svd = TruncatedSVD(n_components=50)
+            self.train_features = svd.fit_transform(self.tfidf_train)
+            print 'The dimensions after performing LSI are ' , self.train_features.shape
+
+            self.test_features = svd.transform(self.tfidf_test)
+
+        elif technique == "nmf":
+
+            print '\nThe dimensions before performing NMF are ' , self.tfidf_train.shape
+            nmf_obj = NMF(n_components=50, init='random', random_state=0)
+            self.train_features = nmf_obj.fit_transform(self.tfidf_train)
+            print 'The dimensions after performing NMF are ' , self.train_features.shape
+
+            self.test_features = nmf_obj.transform(self.tfidf_test)
 
 
