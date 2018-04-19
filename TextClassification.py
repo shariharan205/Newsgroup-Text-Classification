@@ -221,3 +221,56 @@ class TextClassifier(object):
             self.test_features = nmf_obj.transform(self.tfidf_test)
 
 
+    def classify(self, classifier_obj = None, classifier = "", lower_threshold = 3, plot_roc = True, get_coef=False):
+        """
+        We convert the target from multiclass to binary by grouping together the classes.
+
+        We then fit the training data to the model object and predict based on the test set.
+        Also, this method prints the metrics like accuracy, precision recall, confusion matrix and ROC plot.
+        """
+
+
+        #first 4 values set to 0 - Computer Technology, next 4 set to 1 - Recreational Activity
+        self.train_target = self.threshold(self.train.target, lower_threshold = lower_threshold)
+        self.test_target  = self.threshold(self.test.target, lower_threshold = lower_threshold)
+
+        obj = classifier_obj.fit(self.train_features, self.train_target)
+        result = obj.predict(self.test_features)
+
+        print "\nAccuracy  - " , metrics.accuracy_score(self.test_target, result) * 100, '%'
+
+        print "\nPrecision and Recall values: \n", metrics.classification_report(self.test_target , result)
+        print "\nConfusion matrix:\n"
+        print metrics.confusion_matrix(self.test_target , result)
+
+        if plot_roc:
+            self.plot_ROC(self.test_target, obj.predict_proba(self.test_features)[:,1], classifier)
+
+        if get_coef:
+            #print "Co-efficient matrix", obj.coef_
+            print "Mean co-efficient - ", np.mean(obj.coef_)
+
+
+
+    def find_best_penalty(self, penalty_range):
+        """
+        This method performs k-fold cross validation and finds the best penalty parameter.
+        """
+
+        max_score = -float("inf")
+        best_penalty = None
+
+        for penalty in penalty_range:
+            obj = SVC(C = 10**penalty, kernel='linear', probability=True)
+            classifier_obj = obj.fit(self.train_features, self.train_target)
+            result = classifier_obj.predict(self.test_features)
+
+            print "Accuracy for penalty = ", penalty , " is : ", metrics.accuracy_score(self.test_target, result) * 100, '%'
+            cv_score = np.mean(cross_validation.cross_val_score(obj, self.train_features, self.train_target, cv=5))
+            if cv_score > max_score:
+                max_score = cv_score
+                best_penalty = penalty
+
+        return 10**best_penalty
+
+
