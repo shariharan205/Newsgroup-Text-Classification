@@ -29,3 +29,38 @@ txt_classifier_obj.get_histogram(ct_ra_categories)
 
 breakpoint()
 
+
+print "\n============================================\n"
+print "Getting TF-IDF.................."
+
+for df in df_range:
+
+    print "\n =============================MIN_DF - " + str(df) + " ===================================\n"
+    txt_classifier_obj.get_tfidf(df=df)
+
+    breakpoint()
+    print "\n============================================\n"
+    print "Running TF-ICF............."
+
+    txt_classifier_obj.get_tficf(significant_terms_reqd = 10, target_classes = tficf_categories)
+
+
+    breakpoint()
+    for technique in feature_selection_techniques:
+
+
+        print "\n============================================\n"
+        print "\n Feature Selection Technique used - ", technique
+
+        txt_classifier_obj.feature_selection(technique)
+
+        breakpoint()
+        print "\n============================================\n"
+
+        print "\nHard SVM Results with gamma = 1000 with ", technique + " min_df = " + str(df)
+        obj = SVC(C=1000, kernel='linear', probability=True)
+        txt_classifier_obj.classify(classifier_obj=obj, classifier= "Hard SVM " + technique + " min_df = " + str(df))
+
+        print "\nSoft SVM Results with gamma = 0.001 with ", technique + " min_df = " + str(df)
+        obj = SVC(C=0.001, kernel='linear', probability=True)
+        txt_classifier_obj.classify(classifier_obj=obj, classifier= "Soft SVM " + technique  + " min_df = " + str(df))
