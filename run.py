@@ -64,3 +64,30 @@ for df in df_range:
         print "\nSoft SVM Results with gamma = 0.001 with ", technique + " min_df = " + str(df)
         obj = SVC(C=0.001, kernel='linear', probability=True)
         txt_classifier_obj.classify(classifier_obj=obj, classifier= "Soft SVM " + technique  + " min_df = " + str(df))
+
+        breakpoint()
+        print "\n============================================\n"
+
+        print "\n Using 5-fold cross validation finding best penalty parameter with ", technique + " min_df = " + str(df)
+
+        best_penalty = txt_classifier_obj.find_best_penalty(penalty_range= range(-3,4))
+
+        print "Best penalty achieved is - ", best_penalty
+
+        obj = SVC(C=best_penalty, kernel='linear', probability=True)
+        txt_classifier_obj.classify(classifier_obj=obj, classifier = "SVM with best penalty of " + str(best_penalty) +\
+                                                                    "  with " + technique  + " min_df = " + str(df))
+
+
+
+        breakpoint()
+        print "\n============================================\n"
+
+
+        
+        print "\nNaive Bayes Classifier with ", technique + " min_df = " + str(df)
+        obj = MultinomialNB() if technique == "nmf" else GaussianNB()
+        txt_classifier_obj.classify(classifier_obj=obj,
+                                    classifier= "Naive Bayes " + technique  +" min_df = " + str(df))
+
+        breakpoint()
