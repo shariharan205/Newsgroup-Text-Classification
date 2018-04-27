@@ -91,3 +91,44 @@ for df in df_range:
                                     classifier= "Naive Bayes " + technique  +" min_df = " + str(df))
 
         breakpoint()
+
+
+        print "\n============================================\n"
+
+        print "\nLogistic Regression Classifier with ", technique + " min_df = " + str(df)
+        obj = LogisticRegression()
+        txt_classifier_obj.classify(classifier_obj=obj,
+                                    classifier= "Logistic Regression " + technique  + " min_df = " + str(df))
+
+        breakpoint()
+        
+        print "\n============================================\n"
+
+        print "\nLogistic Regression Classifier with L1 regularization with ", technique + " min_df = " + str(df)
+        obj = LogisticRegression(penalty="l1")
+        txt_classifier_obj.classify(classifier_obj=obj,
+                                    classifier= "Logistic Regression L1 " + technique  + " min_df = " + str(df))
+
+
+
+        print "\nLogistic Regression Classifier with L2 regularization with ", technique + " min_df = " + str(df)
+        obj = LogisticRegression(penalty="l2")
+        txt_classifier_obj.classify(classifier_obj=obj,
+                                    classifier= "Logistic Regression L2 " + technique + " min_df = " + str(df))
+ 
+        breakpoint()
+        
+        print "Testing different regularization parameters for logistic regression"
+
+        for regularization in ["l1", "l2"]:
+
+            print "Regularization type - ", regularization
+
+            for c in range(-3,4):
+
+                print "Inverse of regularization C = ", 10**c
+                breakpoint()
+                obj = LogisticRegression(penalty=regularization, C=10**c)
+                txt_classifier_obj.classify(classifier_obj=obj, plot_roc=False, get_coef=True)
+
+    breakpoint()
