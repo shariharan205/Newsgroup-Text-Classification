@@ -132,3 +132,40 @@ for df in df_range:
                 txt_classifier_obj.classify(classifier_obj=obj, plot_roc=False, get_coef=True)
 
     breakpoint()
+
+
+print "\n============================================\n"
+
+txt_classifier_obj.get_histogram(tficf_categories, plot = False)
+
+for df in df_range:
+
+    print "\n =============================MIN_DF - " + str(df) + " ===================================\n"
+
+    txt_classifier_obj.get_tfidf(df=df)
+
+    for technique in feature_selection_techniques:
+
+        print "\n Feature Selection Technique used - ", technique + " min_df = " + str(df)
+
+        txt_classifier_obj.feature_selection(technique)
+
+        print "Multiclass Naive Bayes with ", technique + " min_df = " + str(df)
+        obj = MultinomialNB() if technique == "nmf" else GaussianNB()
+        txt_classifier_obj.classify(classifier_obj=obj,lower_threshold = False, plot_roc = False,
+                                    classifier= "Multiclass NaiveBayes " + technique + " min_df = " + str(df))
+
+        breakpoint()
+
+        print "One Vs One with SVM with ", technique + " min_df = " + str(df)
+        obj = OneVsOneClassifier(SVC(kernel='linear', probability=True))
+        txt_classifier_obj.classify(classifier_obj=obj,lower_threshold = False, plot_roc = False,
+                                    classifier= "1vs1 SVM " + technique + " min_df = " + str(df))
+
+        print "One Vs Rest with SVM with ", technique + " min_df = " + str(df)
+        obj = OneVsRestClassifier(SVC(kernel='linear', probability=True))
+        txt_classifier_obj.classify(classifier_obj=obj,lower_threshold = False, plot_roc = False,
+                                    classifier= "1vsRest SVM " + technique + " min_df = " + str(df))
+                                    
+        breakpoint()
+
